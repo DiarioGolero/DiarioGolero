@@ -2,7 +2,8 @@ import { put, list } from "@vercel/blob";
 import { timingSafeEqual } from "node:crypto";
 
 const FILE = "diario-golero/articles.json";
-const SECTIONS = ["Liga", "Copa", "Selección", "Fichajes", "Internacional", "Otros"];
+const SECTIONS = ["LaLiga", "Copa del Rey", "UEFA Champions League", "UEFA Europa League", "Premier League", "Serie A", "Copa Libertadores", "Internacional", "Fichajes"];
+const LEGACY = { Liga: "LaLiga", Copa: "Copa del Rey", "Selección": "Internacional", Otros: "Internacional" };
 
 function authorized(req) {
   const expected = process.env.ADMIN_PASSWORD || "";
@@ -49,7 +50,7 @@ function clean(input) {
       type: a.type === "ed" ? "ed" : "news",
       live: a.type !== "ed" && a.live === true,
       title,
-      sec: SECTIONS.includes(a.sec) ? a.sec : "Otros",
+      sec: SECTIONS.includes(LEGACY[a.sec] || a.sec) ? (LEGACY[a.sec] || a.sec) : "Internacional",
       author: str(a.author, 60).trim() || "Redacción",
       lead: str(a.lead, 220).trim(),
       body,
