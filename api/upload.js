@@ -36,6 +36,6 @@ export default async function handler(req, res) {
     });
     return res.status(200).json({ url: blob.url });
   } catch (e) {
-    return res.status(500).json({ error: "No se pudo guardar la imagen. Revisa que el Blob esté conectado y sea público." });
+    return res.status(500).json({ error: "Error del servidor: " + String((e && e.message) || e).slice(0, 300) });
   }
 }

@@ -87,6 +87,6 @@ export default async function handler(req, res) {
     res.setHeader("Allow", "GET, POST");
     return res.status(405).json({ error: "Método no permitido." });
   } catch (e) {
-    return res.status(500).json({ error: "Error del servidor. Revisa que el almacenamiento Blob esté conectado." });
+    return res.status(500).json({ error: "Error del servidor: " + String((e && e.message) || e).slice(0, 300) });
   }
 }
