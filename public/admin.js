@@ -3,7 +3,7 @@
   var DK="diario-golero-borradores",PK="diario-golero-clave";
   var published=[],drafts=readDrafts(),pw="";
   try{pw=sessionStorage.getItem(PK)||"";}catch(e){}
-  var st={tab:"pub",editId:null,editSrc:"new",edType:"news"};
+  var st={tab:"pub",editId:null,editSrc:"new",edType:"news",image:""};
 
   function readDrafts(){try{var a=JSON.parse(localStorage.getItem(DK));if(Array.isArray(a))return a;}catch(e){}return [];}
   function saveDrafts(){try{localStorage.setItem(DK,JSON.stringify(drafts));}catch(e){}}
@@ -106,6 +106,7 @@
     $("#fLead").value=a?a.lead:"";
     $("#fBody").value=a?a.body:"";
     $("#fLive").checked=a?!!a.live:false;
+    st.image=a&&a.image?a.image:"";showImg();$("#imgMsg").textContent="";$("#fImg").value="";
     $("#err").textContent="";
     $("#saveDraft").hidden=st.editSrc==="pub";
     $("#savePub").textContent=st.editSrc==="pub"?"Publicar cambios":"Publicar";
@@ -118,7 +119,7 @@
     if(needBody&&!body){$("#err").textContent="Escribe el texto del artículo para publicar.";$("#fBody").focus();return null;}
     var au=$("#fAuthor").value.trim();
     try{localStorage.setItem("diario-golero-autor",au);}catch(e){}
-    return {type:st.edType,live:st.edType==="news"&&$("#fLive").checked,title:title,sec:$("#fSec").value,author:au||"Redacción",lead:$("#fLead").value.trim(),body:body};
+    return {type:st.edType,live:st.edType==="news"&&$("#fLive").checked,title:title,sec:$("#fSec").value,author:au||"Redacción",lead:$("#fLead").value.trim(),body:body,image:st.image};
   }
   function saveAsDraft(){
     var d=collect(false);if(!d)return;
@@ -137,11 +138,44 @@
     if(!ok&&st.editSrc!=="pub"&&!wasDraft){drafts.unshift(Object.assign({},d));saveDrafts();st.tab="dr";render();setStatus("No se pudo publicar. Guardamos el texto como borrador.",true);}
   }
 
+  /* Imagen */
+  function showImg(){var on=!!st.image;$("#imgBox").hidden=!on;if(on)$("#imgPrev").src=st.image;}
+  function toJpeg(file){return new Promise(function(res,rej){
+    var url=URL.createObjectURL(file),img=new Image();
+    img.onload=function(){
+      var w=img.naturalWidth,hh=img.naturalHeight,k=Math.min(1,1600/Math.max(w,hh));
+      var c=document.createElement("canvas");c.width=Math.round(w*k);c.height=Math.round(hh*k);
+      var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob(function(b){b?res(b):rej(new Error("No se pudo procesar la imagen."));},"image/jpeg",0.85);
+    };
+    img.onerror=function(){URL.revokeObjectURL(url);rej(new Error("El archivo no es una imagen válida."));};
+    img.src=url;
+  });}
+  function toB64(blob){return new Promise(function(res,rej){
+    var r=new FileReader();r.onload=function(){res(String(r.result).split(",")[1]);};r.onerror=function(){rej(new Error("No se pudo leer la imagen."));};r.readAsDataURL(blob);
+  });}
+  async function pickImage(){
+    var f=$("#fImg").files[0];if(!f)return;
+    $("#imgMsg").textContent="Subiendo imagen…";setBusy(true);
+    try{
+      var b64=await toB64(await toJpeg(f));
+      var r=await fetch("/api/upload",{method:"POST",headers:{"Content-Type":"application/json","x-admin-password":pw},body:JSON.stringify({data:b64})});
+      var j=await r.json().catch(function(){return {};});
+      if(r.status===401){$("#editor").close();logout("La clave ya no es válida. Ingresa de nuevo.");return;}
+      if(!r.ok)throw new Error(j.error||"Error "+r.status);
+      st.image=j.url;showImg();$("#imgMsg").textContent="Imagen lista.";
+    }catch(e){$("#imgMsg").textContent="No se pudo subir la imagen: "+e.message;}
+    finally{setBusy(false);}
+  }
+
   /* Eventos */
   SEC.forEach(function(s){$("#fSec").appendChild(h("option",{value:s,text:s}));});
   document.querySelectorAll("#typeSeg button").forEach(function(b){b.addEventListener("click",function(){setEdType(b.dataset.t);});});
   document.querySelectorAll("#tabs button").forEach(function(b){b.addEventListener("click",function(){st.tab=b.dataset.k;render();});});
   $("#new").addEventListener("click",function(){openEditor(null,"new");});
+  $("#fImg").addEventListener("change",pickImage);
+  $("#imgDel").addEventListener("click",function(){st.image="";$("#fImg").value="";showImg();$("#imgMsg").textContent="";});
   $("#cancel").addEventListener("click",function(){$("#editor").close();});
   $("#saveDraft").addEventListener("click",saveAsDraft);
   $("#savePub").addEventListener("click",savePublish);

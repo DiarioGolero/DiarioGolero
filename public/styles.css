@@ -88,3 +88,7 @@ footer{padding:20px;text-align:center;font:14px var(--ui);color:var(--muted)}
 .login h2{font:800 34px/1 var(--head);margin:0 0 8px}
 .login input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--bg);font:16px var(--ui);margin:6px 0 12px}
 .hlink{color:#fff;font:600 15px var(--ui);margin-right:12px}
+
+.thumb{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:6px;margin:0 0 12px;background:var(--line)}
+.reader .hero{display:block;width:100%;max-height:420px;object-fit:cover;border-radius:6px;margin:4px 0 16px;background:var(--line)}
+.imgprev{display:block;max-width:100%;max-height:200px;border-radius:6px;margin:8px 0}

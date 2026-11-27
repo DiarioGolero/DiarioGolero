@@ -22,6 +22,16 @@ async function readArticles() {
   return Array.isArray(data) ? data : [];
 }
 
+function okImage(u) {
+  try {
+    const x = new URL(String(u || ""));
+    const ok = x.protocol === "https:" && x.hostname.endsWith(".public.blob.vercel-storage.com") && x.pathname.startsWith("/diario-golero/img/");
+    return ok ? x.href : "";
+  } catch {
+    return "";
+  }
+}
+
 const str = (v, max) => String(v ?? "").slice(0, max);
 
 function clean(input) {
@@ -43,6 +53,7 @@ function clean(input) {
       author: str(a.author, 60).trim() || "Redacción",
       lead: str(a.lead, 220).trim(),
       body,
+      image: okImage(a.image),
       date: Number.isFinite(a.date) ? a.date : Date.now(),
     });
   }
