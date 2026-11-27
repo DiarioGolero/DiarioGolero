@@ -5,7 +5,7 @@
   try{pw=sessionStorage.getItem(PK)||"";}catch(e){}
   var st={tab:"pub",editId:null,editSrc:"new",edType:"news",image:""};
 
-  function readDrafts(){try{var a=JSON.parse(localStorage.getItem(DK));if(Array.isArray(a))return a;}catch(e){}return [];}
+  function readDrafts(){try{var a=JSON.parse(localStorage.getItem(DK));if(Array.isArray(a))return a.map(DG.fixSec);}catch(e){}return [];}
   function saveDrafts(){try{localStorage.setItem(DK,JSON.stringify(drafts));}catch(e){}}
   function setStatus(m,bad){var s=$("#status");s.textContent=m||"";s.style.color=bad?"var(--danger)":"var(--muted)";}
   function setBusy(b){["#savePub","#saveDraft","#new"].forEach(function(s){$(s).disabled=b;});}
@@ -38,7 +38,7 @@
     showDesk(true);setStatus("Cargando…");
     try{
       var r=await fetch("/api/articles");if(!r.ok)throw 0;
-      var d=await r.json();published=Array.isArray(d)?d:[];setStatus("");
+      var d=await r.json();published=Array.isArray(d)?d.map(DG.fixSec):[];setStatus("");
     }catch(e){setStatus("No se pudieron cargar los artículos publicados.",true);}
     render();
   }

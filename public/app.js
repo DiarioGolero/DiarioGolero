@@ -33,14 +33,20 @@
     var a=list.filter(function(x){return x.id===m[1];})[0];
     if(a)DG.openReader(a,false);
   }
-  ["Todas"].concat(DG.SEC).forEach(function(s){$("#sec").appendChild(h("option",{value:s,text:s==="Todas"?"Todas las secciones":s}));});
+  var chipBtns=[];
+  ["Todas"].concat(DG.SEC).forEach(function(s){
+    var b=h("button",{type:"button",class:"chipbtn","aria-pressed":String(s==="Todas")},[DG.icon(s),document.createTextNode(s)]);
+    b.addEventListener("click",function(){
+      st.sec=s;chipBtns.forEach(function(x){x.b.setAttribute("aria-pressed",String(x.s===s));});render();
+    });
+    chipBtns.push({s:s,b:b});$("#secs").appendChild(b);
+  });
   document.querySelectorAll("#fType button").forEach(function(b){b.addEventListener("click",function(){
     st.type=b.dataset.t;document.querySelectorAll("#fType button").forEach(function(x){x.setAttribute("aria-pressed",x===b);});render();});});
-  $("#sec").addEventListener("change",function(e){st.sec=e.target.value;render();});
   $("#q").addEventListener("input",function(e){st.q=e.target.value;render();});
   window.addEventListener("hashchange",fromHash);
   fetch("/api/articles").then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(d){
-    list=Array.isArray(d)?d:[];render();fromHash();
+    list=Array.isArray(d)?d.map(DG.fixSec):[];render();fromHash();
   }).catch(function(){
     var l=$("#layout");l.className="layout";l.textContent="";
     l.appendChild(h("div",{class:"empty",text:"No pudimos cargar las noticias. Actualiza la página en unos segundos."}));
