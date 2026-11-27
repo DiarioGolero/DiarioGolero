@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diario Golero · Fútbol</title>
+<meta name="description" content="Noticias y editoriales de fútbol.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head><body>
+<header class="top"><div class="wrap">
+  <div><h1 class="brand">Diario<span>Golero</span></h1><p class="tag">Noticias y editoriales de fútbol</p></div>
+</div></header>
+<main class="wrap">
+  <div class="bar">
+    <div class="seg" id="fType" role="group" aria-label="Tipo de contenido">
+      <button type="button" data-t="all" aria-pressed="true">Todo</button>
+      <button type="button" data-t="news" aria-pressed="false">Noticias</button>
+      <button type="button" data-t="ed" aria-pressed="false">Editoriales</button>
+    </div>
+    <select id="sec" aria-label="Sección"></select>
+    <input id="q" type="search" placeholder="Buscar por título o texto" aria-label="Buscar">
+  </div>
+  <div class="layout" id="layout"><div class="empty">Cargando…</div></div>
+</main>
+<footer>Diario Golero</footer>
+<dialog id="reader"><div class="dlg" id="readerBody"></div></dialog>
+<script src="/common.js"></script>
+<script src="/app.js"></script>
+</body></html>
