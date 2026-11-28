@@ -4,6 +4,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Diario Golero · Fútbol</title>
 <meta name="description" content="Noticias y editoriales de fútbol.">
+<meta property="og:site_name" content="Diario Golero">
+<meta property="og:title" content="Diario Golero · Fútbol">
+<meta property="og:description" content="Noticias y editoriales de fútbol.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
@@ -12,6 +15,7 @@
 <header class="top"><div class="wrap">
   <div><h1 class="brand">Diario<span>Golero</span></h1><p class="tag">Noticias y editoriales de fútbol</p></div>
 </div></header>
+<div class="tick" id="tick" hidden><div class="wrap" id="tickIn"></div></div>
 <main class="wrap">
   <div class="bar">
     <div class="seg" id="fType" role="group" aria-label="Tipo de contenido">
@@ -22,10 +26,13 @@
     <input id="q" type="search" placeholder="Buscar por título o texto" aria-label="Buscar">
   </div>
   <div class="chips" id="secs" role="group" aria-label="Sección"></div>
-  <div class="layout" id="layout"><div class="empty">Cargando…</div></div>
+  <div class="b-wrap">
+    <section class="mosaic" id="mosaic" aria-label="Noticias"><div class="empty">Cargando…</div></section>
+    <aside class="b-rail" id="rail" aria-label="Lo más leído"><h2>Lo más leído</h2><ol class="rd" id="top"></ol></aside>
+  </div>
+  <div class="morewrap"><button class="btn ghost" id="more" type="button" hidden>Ver más notas</button></div>
 </main>
 <footer>Diario Golero</footer>
-<dialog id="reader"><div class="dlg" id="readerBody"></div></dialog>
 <script src="/common.js"></script>
 <script src="/app.js"></script>
 </body></html>

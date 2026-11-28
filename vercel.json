@@ -1,6 +1,7 @@
 {
   "outputDirectory": "public",
   "cleanUrls": true,
+  "rewrites": [{ "source": "/a/:id", "destination": "/api/article?id=:id" }],
   "headers": [
     { "source": "/admin", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] }
   ]

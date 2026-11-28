@@ -1,20 +1,23 @@
-# Diario Golero: cómo publicarlo en Vercel
+# Diario Golero: proyecto para Vercel
 
-## Qué contiene
-- `public/index.html`: la portada que ve el público.
-- `public/admin.html`: la sala de redacción (con clave). Se abre en `tu-dominio.vercel.app/admin`.
-- `api/articles.js`: guarda y entrega los artículos (almacenamiento Vercel Blob).
+## Estructura
+- `public/index.html`, `app.js`: portada pública (mosaico, cinta de resultados, «Lo más leído»).
+- `public/article.js`: comportamiento de la página de cada artículo.
+- `public/admin.html`, `admin.js`: sala de redacción (`/admin`, con clave).
+- `public/common.js`, `styles.css`: piezas compartidas y diseño.
+- `api/articles.js`: guarda y entrega los artículos.
+- `api/article.js` + `api/_render.js`: página propia de cada artículo (`/a/ID`), con vista previa para WhatsApp y redes.
+- `api/results.js`: resultados de la cinta superior.
+- `api/views.js`: contador de lecturas para «Lo más leído».
+- `api/upload.js`: subida de imágenes.
+- `api/_lib.js`, `api/_util.js`: utilidades internas.
 - `vercel.json`, `package.json`: configuración.
 
-## Pasos
-1. Sube esta carpeta a un repositorio de GitHub, o usa `vercel` desde la terminal dentro de la carpeta.
-2. En vercel.com: **Add New → Project** e importa el repositorio. No cambies nada y pulsa **Deploy**.
-3. En el proyecto, ve a **Storage → Create → Blob**. Crea el almacén y conéctalo al proyecto. Vercel agrega solo la variable `BLOB_READ_WRITE_TOKEN`.
-4. En **Settings → Environment Variables** agrega `ADMIN_PASSWORD` con la clave que quieras para entrar a la redacción.
-5. Haz un nuevo deploy (**Deployments → ⋯ → Redeploy**) para que tome las variables.
-6. Entra a `/admin`, escribe tu clave y publica el primer artículo.
+## Variables necesarias en Vercel
+- `ADMIN_PASSWORD`: la clave de la redacción.
+- `BLOB_READ_WRITE_TOKEN`: llave del almacén Blob (debe ser público).
 
 ## Notas
-- Hasta que publiques algo, la portada se ve vacía.
-- Los borradores se guardan en el navegador desde el que escribes. Solo lo publicado queda en el servidor.
-- Si cambias `ADMIN_PASSWORD`, vuelve a hacer deploy.
+- Los borradores se guardan en el navegador desde el que escribes.
+- El contador de lecturas cuenta una visita por navegador cada 6 horas.
+- Si dos personas publican exactamente al mismo tiempo, gana la última.
