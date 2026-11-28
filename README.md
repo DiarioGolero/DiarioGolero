@@ -9,6 +9,7 @@
 - `api/article.js` + `api/_render.js`: página propia de cada artículo (`/a/ID`), con vista previa para WhatsApp y redes.
 - `api/results.js`: resultados de la cinta superior.
 - `api/views.js`: contador de lecturas para «Lo más leído».
+- `api/comments.js` + `api/_comments.js`: comentarios sin registro (nickname + texto), con moderación desde la redacción.
 - `api/upload.js`: subida de imágenes.
 - `api/_lib.js`, `api/_util.js`: utilidades internas.
 - `vercel.json`, `package.json`: configuración.

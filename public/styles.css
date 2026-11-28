@@ -163,3 +163,22 @@ a.brandlink{color:inherit;text-decoration:none}
 .rrow .gl{width:58px;text-align:center}
 #aBox{display:flex;align-items:center;gap:12px}
 .aprev{width:56px;height:56px;border-radius:50%;object-fit:cover}
+
+.cc{display:inline-flex;align-items:center;gap:4px;margin-left:auto}
+.cc svg{width:14px;height:14px}
+.comments{margin-top:34px;padding-top:6px}
+.comments label{display:block;font:600 14px var(--ui);margin:12px 0 4px}
+.comments input[type=text],.comments textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font:16px var(--ui)}
+.comments textarea{resize:vertical;min-height:96px}
+.comments form .btn{margin-top:12px}
+.chelp{font:13px var(--ui);color:var(--muted);margin:8px 0 0}
+#cmsg{font:600 14px var(--ui);min-height:1.4em;margin:6px 0 0}
+.hpot{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+#clist{margin-top:22px}
+.cm{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.cm .ch{display:flex;gap:10px;align-items:center;font:13px var(--ui);color:var(--muted);flex-wrap:wrap}
+.cm .ch b{color:var(--ink);font-size:15px}
+.cm p{margin:6px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.lnk{margin-left:auto;border:0;background:none;color:var(--muted);font:600 13px var(--ui);text-decoration:underline;cursor:pointer;padding:0}
+.lnk:disabled{opacity:.6;cursor:default;text-decoration:none}
+.cmrow p{margin:6px 0}

@@ -12,7 +12,8 @@
     "Serie A":'<rect x="4" y="5" width="16" height="14" rx="2"/><path d="M9.3 5v14M14.7 5v14"/>',
     "Copa Libertadores":'<path d="M12 3c2 2.5 3 4 3 5.5a3 3 0 0 1-6 0C9 7 10 5.5 12 3z"/><path d="M9 13h6l-1 8h-4z"/>',
     "Internacional":'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
-    "Fichajes":'<path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4"/>'
+    "Fichajes":'<path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4"/>',
+    "Comentarios":'<path d="M4 5h16v11H9l-5 4z"/>'
   };
   function h(tag,props,kids){
     var e=document.createElement(tag);

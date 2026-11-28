@@ -75,3 +75,19 @@ export function cleanResults(input) {
   }
   return out;
 }
+
+export function cleanNick(v) {
+  const n = String(v ?? "").replace(/[\u0000-\u001f\u007f]/g, "").replace(/\s+/g, " ").trim().slice(0, 24);
+  return n.length >= 2 && /^[\p{L}\p{N} ._-]+$/u.test(n) ? n : "";
+}
+export function cleanText(v) {
+  return String(v ?? "").replace(/\r/g, "").replace(/[\u0000-\u0009\u000b\u000c\u000e-\u001f\u007f]/g, "").replace(/\n{3,}/g, "\n\n").trim().slice(0, 500);
+}
+export function hasLink(s) {
+  return /(https?:\/\/|www\.|\b[a-z0-9-]+\.(com|net|org|cl|io|xyz|info|ly|me|co|es|ar|mx|tv|gg)\b)/i.test(String(s || ""));
+}
+const RESERVED = ["redaccion", "admin", "administrador", "diariogolero", "moderador", "moderacion", "golero"];
+export function reservedNick(n) {
+  const k = String(n).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[\s._-]/g, "");
+  return RESERVED.includes(k);
+}

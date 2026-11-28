@@ -64,6 +64,12 @@ export function renderArticle(a, others, origin) {
     `<a href="https://twitter.com/intent/tweet?text=${shareText}&url=${enc(url)}" target="_blank" rel="noopener">X</a>` +
     `<a href="https://www.facebook.com/sharer/sharer.php?u=${enc(url)}" target="_blank" rel="noopener">Facebook</a>` +
     '<button type="button" id="copy">Copiar enlace</button><button type="button" id="native" hidden>Más opciones</button></div>' +
+    '<section class="comments" id="comments" aria-label="Comentarios"><h2 class="col-title">Comentarios <span id="ccount"></span></h2>' +
+    '<form id="cform" novalidate><label for="cnick">Tu nickname</label><input id="cnick" type="text" maxlength="24" autocomplete="nickname">' +
+    '<label for="ctext">Tu comentario</label><textarea id="ctext" maxlength="500" rows="4"></textarea>' +
+    '<div class="hpot" aria-hidden="true"><label>No llenar este campo<input id="cweb" type="text" tabindex="-1" autocomplete="off"></label></div>' +
+    '<p class="chelp">Sé respetuoso. Los comentarios con enlaces, insultos o spam se eliminan.</p><p id="cmsg" role="status"></p>' +
+    '<button class="btn" id="csend" type="submit">Publicar comentario</button></form><div id="clist"></div></section>' +
     "</article>" +
     (more ? `<section class="more"><h2 class="col-title">Más noticias</h2><div class="more-grid">${more}</div></section>` : "") +
     '</main><footer>Diario Golero</footer><script src="/common.js"></script><script src="/article.js"></script></body></html>'

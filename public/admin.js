@@ -2,7 +2,7 @@
   var h=DG.h,SEC=DG.SEC,$=function(s){return document.querySelector(s)};
   var DK="diario-golero-borradores",PK="diario-golero-clave",AK="diario-golero-autores";
   var STAT=["Final","En vivo","Medio tiempo","Por jugar","Suspendido"];
-  var published=[],results=[],drafts=readDrafts(),pw="";
+  var published=[],results=[],comments=[],cmLoaded=false,drafts=readDrafts(),pw="";
   try{pw=sessionStorage.getItem(PK)||"";}catch(e){}
   var st={tab:"pub",editId:null,editSrc:"new",edType:"news",image:"",authorImg:""};
 
@@ -68,10 +68,12 @@
   function render(){
     var tb=document.querySelectorAll("#tabs button");
     tb[0].textContent="Publicados ("+published.length+")";tb[1].textContent="Borradores ("+drafts.length+")";
+    tb[3].textContent="Comentarios"+(cmLoaded?" ("+comments.length+")":"");
     tb.forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.k===st.tab));});
-    var rs=st.tab==="rs";
-    $("#results").hidden=!rs;$("#deskList").hidden=rs;
+    var rs=st.tab==="rs",cm=st.tab==="cm";
+    $("#results").hidden=!rs;$("#cmList").hidden=!cm;$("#deskList").hidden=rs||cm;
     if(rs){renderResults();return;}
+    if(cm){renderComments();return;}
     var pub=st.tab==="pub",list=(pub?published:drafts).slice().sort(DG.byDate);
     var box=$("#deskList");box.textContent="";
     if(!list.length)box.appendChild(h("div",{class:"empty",text:pub?"No hay artículos publicados. Pulsa “Escribir artículo” para crear uno.":"No tienes borradores. Pulsa “Escribir artículo” para empezar uno."}));
@@ -101,6 +103,48 @@
     if(!confirm("¿Eliminar este artículo? No se puede deshacer."))return;
     if(pub)await save(published.filter(function(x){return x.id!==id;}));
     else{drafts=drafts.filter(function(x){return x.id!==id;});saveDrafts();render();}
+  }
+
+  /* Comentarios */
+  async function loadComments(){
+    try{
+      var r=await api("/api/comments?all=1","GET");
+      if(r.status===401){logout("La clave ya no es válida. Ingresa de nuevo.");return;}
+      if(!r.ok)throw 0;
+      var d=await r.json();comments=Array.isArray(d)?d:[];
+    }catch(e){comments=[];setStatus("No se pudieron cargar los comentarios.",true);}
+    cmLoaded=true;if(st.tab==="cm")render();
+  }
+  function renderComments(){
+    var box=$("#cmList");box.textContent="";
+    if(!cmLoaded){box.appendChild(h("div",{class:"empty",text:"Cargando comentarios…"}));loadComments();return;}
+    box.appendChild(h("p",{class:"hint",text:"Los comentarios se publican al instante. Aquí puedes eliminarlos. Los más reportados aparecen primero."}));
+    if(!comments.length){box.appendChild(h("div",{class:"empty",text:"Todavía no hay comentarios."}));return;}
+    var titles={};published.forEach(function(a){titles[a.id]=a.title;});
+    comments.slice().sort(function(a,b){return (b.reports||0)-(a.reports||0)||b.date-a.date;}).forEach(function(c){
+      var acts=[h("button",{class:"btn sm danger",type:"button",text:"Eliminar",onclick:function(){cmAction("delete",c);}})];
+      if(c.reports>0)acts.unshift(h("button",{class:"btn sm ghost",type:"button",text:"Descartar reportes",onclick:function(){cmAction("dismiss",c);}}));
+      box.appendChild(h("article",{class:"item cmrow"},[
+        h("div",{class:"meta"},[
+          c.reports>0?h("span",{class:"chip live",text:c.reports+" reporte"+(c.reports>1?"s":"")}):null,
+          h("span",{text:c.nick}),
+          h("span",{text:new Date(c.date).toLocaleString("es",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})})
+        ]),
+        h("p",{text:c.text,style:"white-space:pre-wrap"}),
+        h("div",{class:"by",text:"En: "+(titles[c.aid]||"(nota eliminada)")}),
+        h("div",{class:"rowact"},acts)
+      ]));
+    });
+  }
+  async function cmAction(action,c){
+    if(action==="delete"&&!confirm("¿Eliminar este comentario?"))return;
+    try{
+      var r=await api("/api/comments","POST",{action:action,id:c.aid,cid:c.cid});
+      if(r.status===401){logout("La clave ya no es válida. Ingresa de nuevo.");return;}
+      if(!r.ok)throw 0;
+      if(action==="delete")comments=comments.filter(function(x){return x.cid!==c.cid;});else c.reports=0;
+      setStatus(action==="delete"?"Comentario eliminado.":"Reportes descartados.");render();
+    }catch(e){setStatus("No se pudo completar la acción.",true);}
   }
 
   /* Resultados */
