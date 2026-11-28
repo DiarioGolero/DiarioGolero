@@ -148,25 +148,51 @@
   }
 
   /* Resultados */
+  function matchEditor(r,i){
+    var pv=h("div",{class:"pv"});
+    function paint(){pv.textContent="";pv.appendChild(DG.matchCard(r,published));}
+    function wrapL(label,el){return h("label",null,[document.createTextNode(label),el]);}
+    function sel(opts,val,fn){var s=h("select");opts.forEach(function(o){s.appendChild(h("option",{value:o[0],text:o[1]}));});s.value=val;s.addEventListener("change",function(){fn(s.value);paint();});return s;}
+    function txt(val,key){var e=h("input",{type:"text",maxlength:"30"});e.value=val||"";e.addEventListener("input",function(){r[key]=e.value;paint();});return e;}
+    function num(val,key){var e=h("input",{type:"number",min:"0",max:"99",placeholder:"–"});e.value=val==null?"":val;
+      e.addEventListener("input",function(){r[key]=e.value===""?null:Math.max(0,Math.min(99,parseInt(e.value,10)||0));paint();});return e;}
+    function crestUp(key){
+      var msg=h("span",{class:"hint",text:""}),inp=h("input",{type:"file",accept:"image/*","aria-label":"Subir escudo"});
+      inp.addEventListener("change",async function(){
+        var f=inp.files[0];if(!f)return;msg.textContent="Subiendo…";
+        try{r[key]=await upload(f,256,"png");msg.textContent="Escudo listo.";paint();}
+        catch(e){if(e.code===401)logout("La clave ya no es válida. Ingresa de nuevo.");else msg.textContent="No se pudo subir: "+e.message;}
+        inp.value="";
+      });
+      return h("div",{class:"up"},[inp,h("button",{class:"btn sm ghost",type:"button",text:"Quitar escudo",onclick:function(){r[key]="";paint();}}),msg]);
+    }
+    var news=[["","Sin noticia por ahora"]].concat(published.slice().sort(DG.byDate).map(function(a){return [a.id,a.title.length>70?a.title.slice(0,70)+"…":a.title];}));
+    var form=h("div",{class:"mform"},[
+      h("div",{class:"r2"},[
+        wrapL("Competición",sel(SEC.map(function(s){return [s,s];}),r.comp,function(v){r.comp=v;})),
+        wrapL("Estado",sel(STAT.map(function(s){return [s,s];}),r.status||"Final",function(v){r.status=v;}))
+      ]),
+      h("h4",{text:"Local"}),
+      h("div",{class:"r2g"},[wrapL("Equipo",txt(r.home,"home")),wrapL("Goles",num(r.hs,"hs"))]),
+      crestUp("homeImg"),
+      h("h4",{text:"Visitante"}),
+      h("div",{class:"r2g"},[wrapL("Equipo",txt(r.away,"away")),wrapL("Goles",num(r.as,"as"))]),
+      crestUp("awayImg"),
+      wrapL("Noticia que va debajo del resultado",sel(news,r.articleId||"",function(v){r.articleId=v;})),
+      h("button",{class:"btn sm danger",type:"button",text:"Quitar partido",onclick:function(){results.splice(i,1);renderResults();}})
+    ]);
+    paint();
+    return h("div",{class:"medit"},[form,h("div",null,[h("p",{class:"by",text:"Así se verá en la portada"}),pv])]);
+  }
   function renderResults(){
     var box=$("#results");box.textContent="";
-    box.appendChild(h("p",{class:"hint",text:"Estos partidos aparecen en la cinta de resultados de la portada (máximo 12). Deja los goles vacíos si el partido aún no empieza."}));
+    box.appendChild(h("p",{class:"hint",text:"Estos partidos aparecen como tarjetas arriba de la portada (máximo 12). Sube el escudo de cada equipo, escribe el marcador y elige la noticia que va debajo. Deja los goles vacíos si el partido aún no empieza."}));
     if(!results.length)box.appendChild(h("div",{class:"empty",text:"No hay partidos cargados. Pulsa “Agregar partido”."}));
-    results.forEach(function(r,i){
-      var comp=h("select",{"aria-label":"Competición"});SEC.forEach(function(s){comp.appendChild(h("option",{value:s,text:s}));});
-      comp.value=r.comp;comp.addEventListener("change",function(){r.comp=comp.value;});
-      function txt(val,ph,key){var e=h("input",{type:"text",class:"tm",maxlength:"40",placeholder:ph,"aria-label":ph});e.value=val||"";e.addEventListener("input",function(){r[key]=e.value;});return e;}
-      function num(val,ph,key){var e=h("input",{type:"number",class:"gl",min:"0",max:"99",placeholder:"–","aria-label":ph});e.value=val==null?"":val;
-        e.addEventListener("input",function(){r[key]=e.value===""?null:Math.max(0,Math.min(99,parseInt(e.value,10)||0));});return e;}
-      var stSel=h("select",{"aria-label":"Estado"});STAT.forEach(function(s){stSel.appendChild(h("option",{value:s,text:s}));});
-      stSel.value=r.status||"Final";stSel.addEventListener("change",function(){r.status=stSel.value;});
-      box.appendChild(h("div",{class:"rrow"},[comp,txt(r.home,"Local","home"),num(r.hs,"Goles local","hs"),h("span",{text:"–"}),num(r.as,"Goles visitante","as"),txt(r.away,"Visitante","away"),stSel,
-        h("button",{class:"btn sm danger",type:"button",text:"Quitar",onclick:function(){results.splice(i,1);renderResults();}})]));
-    });
+    results.forEach(function(r,i){box.appendChild(matchEditor(r,i));});
     box.appendChild(h("div",{class:"rowact"},[
       h("button",{class:"btn ghost",type:"button",text:"Agregar partido",onclick:function(){
         if(results.length>=12){setStatus("Máximo 12 partidos.",true);return;}
-        results.push({comp:SEC[0],home:"",away:"",hs:null,as:null,status:"Final"});renderResults();}}),
+        results.push({comp:SEC[0],home:"",away:"",hs:null,as:null,status:"Final",homeImg:"",awayImg:"",articleId:""});renderResults();}}),
       h("button",{class:"btn",type:"button",text:"Guardar resultados",onclick:saveResults})
     ]));
   }
@@ -243,14 +269,15 @@
   function preview(){var d=collect(false);if(!d)return;d.id="vista-previa";d.date=Date.now();DG.openReader(d);}
 
   /* Imágenes */
-  function toJpeg(file,max){return new Promise(function(res,rej){
+  function toImg(file,max,fmt){return new Promise(function(res,rej){
     var url=URL.createObjectURL(file),img=new Image();
     img.onload=function(){
-      var w=img.naturalWidth,hh=img.naturalHeight,k=Math.min(1,max/Math.max(w,hh));
-      var c=document.createElement("canvas");c.width=Math.round(w*k);c.height=Math.round(hh*k);
-      var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);
-      URL.revokeObjectURL(url);
-      c.toBlob(function(b){b?res(b):rej(new Error("No se pudo procesar la imagen."));},"image/jpeg",0.85);
+      var w=img.naturalWidth||max,hh=img.naturalHeight||max,k=Math.min(1,max/Math.max(w,hh));
+      var c=document.createElement("canvas");c.width=Math.max(1,Math.round(w*k));c.height=Math.max(1,Math.round(hh*k));
+      var x=c.getContext("2d");
+      if(fmt!=="png"){x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);}
+      x.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);
+      c.toBlob(function(b){b?res(b):rej(new Error("No se pudo procesar la imagen."));},fmt==="png"?"image/png":"image/jpeg",0.85);
     };
     img.onerror=function(){URL.revokeObjectURL(url);rej(new Error("El archivo no es una imagen válida."));};
     img.src=url;
@@ -258,9 +285,10 @@
   function toB64(blob){return new Promise(function(res,rej){
     var r=new FileReader();r.onload=function(){res(String(r.result).split(",")[1]);};r.onerror=function(){rej(new Error("No se pudo leer la imagen."));};r.readAsDataURL(blob);
   });}
-  async function upload(file,max){
-    var b64=await toB64(await toJpeg(file,max));
-    var r=await fetch("/api/upload",{method:"POST",headers:{"Content-Type":"application/json","x-admin-password":pw},body:JSON.stringify({data:b64})});
+  async function upload(file,max,fmt){
+    var png=fmt==="png";
+    var b64=await toB64(await toImg(file,max,png?"png":"jpeg"));
+    var r=await fetch("/api/upload",{method:"POST",headers:{"Content-Type":"application/json","x-admin-password":pw},body:JSON.stringify({data:b64,format:png?"png":"jpeg"})});
     var j=await r.json().catch(function(){return {};});
     if(r.status===401){var e=new Error("clave");e.code=401;throw e;}
     if(!r.ok)throw new Error(j.error||"Error "+r.status);
@@ -269,7 +297,7 @@
   async function pick(inputSel,msgSel,max,assign){
     var f=$(inputSel).files[0];if(!f)return;
     $(msgSel).textContent="Subiendo imagen…";setBusy(true);
-    try{assign(await upload(f,max));$(msgSel).textContent="Imagen lista.";}
+    try{assign(await upload(f,max,"jpeg"));$(msgSel).textContent="Imagen lista.";}
     catch(e){
       if(e.code===401){$("#editor").close();logout("La clave ya no es válida. Ingresa de nuevo.");}
       else $(msgSel).textContent="No se pudo subir la imagen: "+e.message;

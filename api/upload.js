@@ -23,16 +23,19 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Falta configurar ADMIN_PASSWORD en Vercel." });
     }
     if (!authorized(req)) return res.status(401).json({ error: "Clave incorrecta." });
-    const data = String((req.body && req.body.data) || "");
-    const buf = Buffer.from(data, "base64");
+    const body = req.body || {};
+    const png = body.format === "png";
+    const buf = Buffer.from(String(body.data || ""), "base64");
     if (!buf.length) return res.status(400).json({ error: "No llegó ninguna imagen." });
     if (buf.length > MAX_BYTES) return res.status(413).json({ error: "La imagen es demasiado grande." });
-    const isJpeg = buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff;
-    if (!isJpeg) return res.status(400).json({ error: "El formato de imagen no es válido." });
-    const blob = await put("diario-golero/img/foto.jpg", buf, {
+    const okMagic = png
+      ? buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47
+      : buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff;
+    if (!okMagic) return res.status(400).json({ error: "El formato de imagen no es válido." });
+    const blob = await put(png ? "diario-golero/img/escudo.png" : "diario-golero/img/foto.jpg", buf, {
       access: "public",
       addRandomSuffix: true,
-      contentType: "image/jpeg",
+      contentType: png ? "image/png" : "image/jpeg",
     });
     return res.status(200).json({ url: blob.url });
   } catch (e) {

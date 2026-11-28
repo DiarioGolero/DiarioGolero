@@ -13,8 +13,11 @@
     "Copa Libertadores":'<path d="M12 3c2 2.5 3 4 3 5.5a3 3 0 0 1-6 0C9 7 10 5.5 12 3z"/><path d="M9 13h6l-1 8h-4z"/>',
     "Internacional":'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
     "Fichajes":'<path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4"/>',
-    "Comentarios":'<path d="M4 5h16v11H9l-5 4z"/>'
+    "Comentarios":'<path d="M4 5h16v11H9l-5 4z"/>',
+    "Noticias":'<rect x="4" y="5" width="13" height="14" rx="2"/><path d="M17 9h3v8a2 2 0 0 1-2 2h-1M7.5 9h6M7.5 12h6M7.5 15h3"/>',
+    "Editoriales":'<path d="M9.5 8H7a1.5 1.5 0 0 0-1.5 1.5V12A1.5 1.5 0 0 0 7 13.5h2.5V16a2 2 0 0 1-2 2M18.5 8H16a1.5 1.5 0 0 0-1.5 1.5V12A1.5 1.5 0 0 0 16 13.5h2.5V16a2 2 0 0 1-2 2"/>'
   };
+  ICONS["Todo"]=ICONS["Todas"];
   function h(tag,props,kids){
     var e=document.createElement(tag);
     if(props)for(var k in props){if(k==="text")e.textContent=props[k];else if(k.slice(0,2)==="on")e.addEventListener(k.slice(2),props[k]);else e.setAttribute(k,props[k]);}
@@ -70,5 +73,24 @@
     body.appendChild(h("div",{class:"actions"},[h("button",{class:"btn",type:"button",text:"Cerrar vista previa",onclick:function(){dlg.close();}})]));
     if(!dlg.open)dlg.showModal();
   }
-  window.DG={SEC:SEC,h:h,icon:icon,secChip:secChip,fdate:fdate,byDate:byDate,readTime:readTime,avatar:avatar,card:card,openReader:openReader,fixSec:fixSec};
+  var CREST_COLORS=["#5F0224","#1F4E8C","#2E6B4F","#B8862B","#7A4657","#8A2547"];
+  function crest(name,img){
+    var s=h("span",{class:"crest"});
+    if(img){s.appendChild(h("img",{src:img,alt:""}));return s;}
+    var n=String(name||"?"),k=0;for(var i=0;i<n.length;i++)k=(k*31+n.charCodeAt(i))%997;
+    s.innerHTML='<svg viewBox="0 0 40 46" aria-hidden="true"><path d="M20 2l16 6v14c0 11-7 19-16 22C11 41 4 33 4 22V8z" fill="'+CREST_COLORS[k%CREST_COLORS.length]+'"/></svg>';
+    s.appendChild(h("b",{text:initials(n.trim()==="" ? "?" : n)}));
+    return s;
+  }
+  function matchCard(m,arts){
+    var sc=(m.hs==null||m.as==null)?"vs":m.hs+"–"+m.as,live=m.status==="En vivo";
+    var art=m.articleId?(arts||[]).filter(function(a){return a.id===m.articleId;})[0]:null;
+    function team(n,img){return h("div",{class:"team"},[crest(n,img),document.createTextNode(n||"")]);}
+    var top=h("div",{class:"mt"},[h("span",null,[icon(m.comp),document.createTextNode(m.comp)]),h("span",{class:live?"lv":"",text:m.status})]);
+    var teams=h("div",{class:"teams"},[team(m.home,m.homeImg),h("div",{class:"score",text:sc}),team(m.away,m.awayImg)]);
+    var nw=art?h("a",{class:"nw",href:"/a/"+art.id},[h("small",null,[icon("Noticias"),document.createTextNode("Crónica")]),document.createTextNode(art.title)])
+      :h("span",{class:"nw no",text:"Aún sin crónica"});
+    return h("article",{class:"mcard"},[top,teams,nw]);
+  }
+  window.DG={crest:crest,matchCard:matchCard,SEC:SEC,h:h,icon:icon,secChip:secChip,fdate:fdate,byDate:byDate,readTime:readTime,avatar:avatar,card:card,openReader:openReader,fixSec:fixSec};
 })();

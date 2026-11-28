@@ -71,6 +71,9 @@ export function cleanResults(input) {
       hs: score(r.hs),
       as: score(r.as),
       status: STATUS.includes(r.status) ? r.status : "Final",
+      homeImg: okImage(r.homeImg),
+      awayImg: okImage(r.awayImg),
+      articleId: /^[A-Za-z0-9-]{1,40}$/.test(String(r.articleId || "")) ? String(r.articleId) : "",
     });
   }
   return out;
